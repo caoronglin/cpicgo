@@ -1,20 +1,21 @@
 /**
- * For more details on how to configure Wrangler, refer to:
- * https://developers.cloudflare.com/workers/wrangler/configuration/
+ * 自动部署配置 - Cloudflare Workers 图床
+ * 自动部署到Cloudflare，支持多环境配置
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "r2-worker",
+	"name": "cpicgo",
 	"main": "src/index.js",
 	"compatibility_date": "2025-07-31",
+	"compatibility_flags": ["nodejs_compat"],
 	"observability": {
 		"enabled": true
 	},
-	"triggers": {
-		"crons": [
-			"* * * * *"
-		]
-	}
+	"assets": {
+		"directory": "./src/static",
+		"binding": "ASSETS",
+		"html_handling": "drop-trailing-slash"
+	},
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
@@ -48,5 +49,16 @@
 	 * Service Bindings (communicate between multiple Workers)
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
 	 */
-	// "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
+	"vars": {
+		"CUSTOM_DOMAIN": "cpicgo.luoxing.workers.dev",
+		"CDN_DOMAIN": "img.cnortles.top",
+		"CUSTOM_PATH": "uploads",
+		"API_TOKEN": "tk_7x8z9a2b3c4d5e6f"
+	},
+	"r2_buckets": [
+		{
+			"bucket_name": "image-host-bucket",
+			"binding": "image_host_bucket"
+		}
+	]
 }

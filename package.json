@@ -1,13 +1,37 @@
 {
-	"name": "r2-worker",
-	"version": "0.0.0",
+	"name": "cpicgo",
+	"version": "1.0.0",
+	"description": "简约高效的Cloudflare Workers图床服务",
 	"private": true,
 	"scripts": {
 		"deploy": "wrangler deploy",
+		"deploy:prod": "wrangler deploy",
+		"deploy:dev": "wrangler deploy --env development",
+		"deploy:staging": "wrangler deploy --env staging",
 		"dev": "wrangler dev --test-scheduled",
-		"start": "wrangler dev --test-scheduled"
+		"start": "wrangler dev --test-scheduled",
+		"setup": "npm run setup:secrets && npm run setup:bucket",
+		"setup:secrets": "wrangler secret put API_TOKEN && wrangler secret put USERNAME && wrangler secret put PASSWORD",
+		"setup:bucket": "echo '请手动创建R2存储桶: image-host-bucket'",
+		"test": "node test/test.js",
+		"build": "echo '无需构建步骤，直接部署'",
+		"auto-deploy": "npm run build && npm run deploy"
 	},
+	"keywords": [
+		"cloudflare",
+		"workers",
+		"image-hosting",
+		"r2",
+		"upload",
+		"cdn"
+	],
+	"author": "Your Name",
+	"license": "MIT",
 	"devDependencies": {
-		"wrangler": "^4.26.1"
+		"wrangler": "^4.26.1",
+		"@cloudflare/kv-asset-handler": "^0.4.0"
+	},
+	"engines": {
+		"node": ">=16.0.0"
 	}
 }
