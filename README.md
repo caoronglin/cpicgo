@@ -1,165 +1,240 @@
-# Cpicgo - 现代化图床服务
+# R2 Worker - 现代化Cloudflare R2图床服务
 
-基于Cloudflare Workers和R2存储构建的高性能图片托管服务，采用Vue 3 + Tailwind CSS打造的现代化Web界面。
+基于Cloudflare Workers和R2存储的现代化图床服务，提供完整的图片上传、管理和CDN分发功能。
 
 ## ✨ 特性
 
-- **现代化界面**：Vue 3 + Tailwind CSS响应式设计
-- **高性能**：基于Cloudflare Workers全球边缘网络
-- **无限存储**：集成Cloudflare R2对象存储
-- **多种认证**：支持Basic认证和Bearer Token
-- **文件夹管理**：支持图片分类整理
-- **拖拽上传**：支持批量图片拖拽上传
-- **深色模式**：自动/手动主题切换
-- **移动友好**：完美适配手机和平板
+- 🚀 **现代化架构**：基于Cloudflare Workers的无服务器架构
+- 🖼️ **图片管理**：支持多文件夹管理、批量操作
+- 📊 **实时统计**：图片数量、存储用量、访问统计
+- 🔐 **安全认证**：Bearer Token和Basic Auth双重认证
+- 🎨 **响应式设计**：基于React + TypeScript的现代化前端
+- ⚡ **高性能**：全球CDN分发，毫秒级响应
+- 🛠️ **开发者友好**：完整API文档和开发工具链
+
+## 🏗️ 技术栈
+
+### 后端
+- **Cloudflare Workers** - 无服务器运行时
+- **Cloudflare R2** - 对象存储
+- **JavaScript/ES6+** - 后端语言
+
+### 前端
+- **React 18** - UI框架
+- **TypeScript** - 类型安全
+- **Tailwind CSS** - 样式框架
+- **Vite** - 构建工具
+- **React Router** - 路由管理
 
 ## 🚀 快速开始
 
-### 1. 准备工作
+### 环境要求
+- Node.js 18+
+- Cloudflare账户
+- R2存储桶
 
-- [Cloudflare账户](https://dash.cloudflare.com/sign-up)
-- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
-- Node.js 16+ 环境
-
-### 2. 克隆项目
+### 安装依赖
 
 ```bash
-git clone <repository-url>
-cd picgo/r2-worker
+# 安装根目录依赖
+npm install
+
+# 安装客户端依赖
+cd client && npm install
 ```
 
-### 3. 配置环境
+### 配置环境
 
-编辑 `wrangler.jsonc` 文件：
+1. 复制环境配置模板：
+```bash
+cp .env.example .env
+```
 
+2. 编辑`.env`文件，填入你的配置：
+```bash
+# Cloudflare配置
+R2_BUCKET_NAME=your-bucket-name
+R2_ACCOUNT_ID=your-account-id
+
+# 认证配置
+AUTH_USERNAME=admin
+AUTH_PASSWORD=your-secure-password
+
+# 客户端配置
+VITE_API_BASE_URL=https://your-worker-domain.workers.dev
+
+# 可选：自定义域名
+CUSTOM_DOMAIN=https://your-custom-domain.com
+CDN_DOMAIN=https://your-cdn-domain.com
+```
+
+### 开发运行
+
+```bash
+# 启动开发服务器（前端）
+npm run dev:client
+
+# 启动Worker开发服务器（后端）
+npm run dev
+```
+
+### 构建部署
+
+```bash
+# 构建前端
+npm run build:client
+
+# 部署到Cloudflare
+npm run deploy
+```
+
+## 📁 项目结构
+
+```
+r2-worker/
+├── src/                    # 后端源代码
+│   ├── handlers/          # 路由处理器
+│   │   ├── image.js       # 图片管理
+│   │   ├── folder.js      # 文件夹管理
+│   │   ├── stats.js       # 统计信息
+│   │   └── static.js      # 静态资源
+│   ├── utils/             # 工具函数
+│   │   ├── auth.js        # 认证工具
+│   │   ├── cors.js        # CORS处理
+│   │   └── file.js        # 文件工具
+│   └── index.js           # 入口文件
+├── client/                # 前端应用
+│   ├── src/
+│   │   ├── components/    # React组件
+│   │   ├── contexts/      # React上下文
+│   │   ├── pages/         # 页面组件
+│   │   ├── lib/           # API客户端
+│   │   └── index.css      # 全局样式
+│   ├── package.json
+│   └── vite.config.ts
+├── wrangler.jsonc         # Cloudflare配置
+├── tailwind.config.js     # Tailwind配置
+└── package.json           # 项目配置
+```
+
+## 🔧 API文档
+
+### 认证
+所有API请求都需要包含认证头：
+```
+Authorization: Bearer your-api-token
+```
+
+### 端点
+
+#### 图片管理
+- `GET /api/images` - 获取图片列表
+- `POST /api/images/upload` - 上传图片
+- `DELETE /api/images/:key` - 删除图片
+- `GET /api/images/:key` - 获取图片详情
+
+#### 文件夹管理
+- `GET /api/folders` - 获取文件夹列表
+- `POST /api/folders` - 创建文件夹
+- `DELETE /api/folders/:name` - 删除文件夹
+
+#### 统计信息
+- `GET /api/stats` - 获取统计信息
+- `GET /api/stats/overview` - 总览统计
+- `GET /api/stats/by-date` - 按日期统计
+- `GET /api/stats/by-type` - 按类型统计
+
+## 🎨 界面预览
+
+### 仪表盘
+- 实时统计卡片
+- 上传趋势图表
+- 文件类型分布
+
+### 图库管理
+- 网格/列表视图切换
+- 文件夹管理
+- 图片预览和删除
+- 链接复制功能
+
+### 设置页面
+- API密钥管理
+- 存储配置
+- 账户设置
+- 危险操作警告
+
+## 🔐 安全配置
+
+### 认证方式
+1. **Bearer Token认证**：在请求头中添加`Authorization: Bearer <token>`
+2. **Basic Auth认证**：使用用户名密码进行HTTP基本认证
+
+### 环境变量
+- 所有敏感配置都通过环境变量管理
+- 支持开发、测试、生产多环境配置
+
+## 🚀 部署指南
+
+### Cloudflare部署
+
+1. 安装Wrangler CLI：
+```bash
+npm install -g wrangler
+```
+
+2. 登录Cloudflare：
+```bash
+wrangler login
+```
+
+3. 配置R2存储桶：
+```bash
+wrangler r2 bucket create your-bucket-name
+```
+
+4. 配置Workers绑定：
+在`wrangler.jsonc`中确保已配置R2绑定：
 ```json
 {
-  "name": "your-worker-name",
   "r2_buckets": [
     {
-      "binding": "image_host_bucket",
-      "bucket_name": "your-r2-bucket-name"
+      "binding": "R2_BUCKET",
+      "bucket_name": "your-bucket-name"
     }
-  ],
+  ]
+}
+```
+
+4. 部署应用：
+```bash
+npm run deploy
+```
+
+### 自定义域名
+在`wrangler.jsonc`中配置自定义域名：
+```json
+{
   "vars": {
-    "CUSTOM_DOMAIN": "your-domain.com",
-    "USERNAME": "your-username",
-    "PASSWORD": "your-password",
-    "API_TOKEN": "your-api-token"
+    "CUSTOM_DOMAIN": "https://your-domain.com"
   }
 }
 ```
 
-### 4. 部署到Cloudflare
+## 🧪 开发指南
 
-```bash
-# 登录Cloudflare
-npx wrangler login
+### 代码规范
+- 使用ESLint进行代码检查
+- 使用Prettier进行代码格式化
+- TypeScript严格模式
 
-# 部署
-npx wrangler deploy
-```
+### 调试技巧
+- 使用`wrangler dev`进行本地开发
+- 查看Cloudflare Dashboard日志
+- 使用console.log进行调试
 
-## 📖 使用指南
+## 📄 许可证
 
-### Web界面使用
-
-1. **访问地址**：部署后访问 `https://your-worker.your-subdomain.workers.dev`
-2. **认证配置**：点击右上角"认证"按钮配置访问权限
-3. **上传图片**：
-   - 拖拽图片到上传区域
-   - 或点击"选择图片文件"按钮
-   - 支持多文件批量上传
-4. **文件夹管理**：
-   - 点击"新建文件夹"创建分类
-   - 上传时选择目标文件夹
-5. **图片操作**：
-   - 点击图片预览大图
-   - 点击删除按钮移除图片
-   - 复制图片链接分享
-
-### API使用
-
-#### 上传图片
-
-```bash
-curl -X PUT \
-  -H "Authorization: Bearer your-token" \
-  --data-binary @image.jpg \
-  https://your-domain.com/path/image.jpg
-```
-
-#### 获取图片列表
-
-```bash
-curl -H "Authorization: Bearer your-token" \
-  https://your-domain.com/list
-```
-
-#### 删除图片
-
-```bash
-curl -X DELETE \
-  -H "Authorization: Bearer your-token" \
-  https://your-domain.com/image-id
-```
-
-## 🛠️ 开发指南
-
-### 本地开发
-
-```bash
-# 安装依赖
-npm install
-
-# 本地预览
-npx wrangler dev
-
-# 本地访问 http://localhost:8787
-```
-
-### 项目结构
-
-```
-r2-worker/
-├── src/
-│   ├── index.js          # Worker主逻辑
-│   └── static/           # Web界面文件
-│       ├── index.html    # 主页面
-│       ├── main.js       # Vue应用入口
-│       ├── styles.css    # 样式文件
-│       ├── components/   # Vue组件
-│       └── services/     # 工具服务
-├── wrangler.jsonc        # Worker配置
-└── README.md            # 本文档
-```
-
-## 🔧 配置说明
-
-### wrangler.jsonc 配置项
-
-| 配置项 | 说明 | 示例 |
-|--------|------|------|
-| `name` | Worker名称 | `my-image-host` |
-| `r2_buckets.bucket_name` | R2存储桶名称 | `my-images` |
-| `vars.CUSTOM_DOMAIN` | 自定义域名 | `img.example.com` |
-| `vars.USERNAME` | Basic认证用户名 | `admin` |
-| `vars.PASSWORD` | Basic认证密码 | `secure123` |
-| `vars.API_TOKEN` | Bearer认证令牌 | `tk_xxx...` |
-
-### 环境变量
-
-- `CUSTOM_DOMAIN`: 自定义域名（可选）
-- `USERNAME`: Basic认证用户名
-- `PASSWORD`: Basic认证密码
-- `API_TOKEN`: Bearer认证令牌
-
-## 📱 移动端支持
-
-- 响应式设计，完美适配各种屏幕尺寸
-- 支持触摸手势操作
-- 优化的移动端上传体验
-- 支持iOS/Android原生分享
+MIT License - 详见 [LICENSE](LICENSE) 文件
 
 ## 🤝 贡献指南
 
@@ -167,30 +242,10 @@ r2-worker/
 2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建Pull Request
+5. 开启Pull Request
 
-## 📝 更新日志
+## 📞 支持
 
-### v2.0.0 (2024)
-- ✨ 重构为Vue 3 + Tailwind CSS架构
-- 🎨 全新现代化界面设计
-- 📱 增强移动端体验
-- 🌙 添加深色模式支持
-- 🔧 优化组件化架构
-
-### v1.0.0 (2024)
-- 🎉 初始版本发布
-- 🚀 Cloudflare Workers集成
-- 📦 R2存储支持
-- 🔐 多种认证方式
-
-## 📄 许可证
-
-MIT License - 详见 [LICENSE](LICENSE) 文件
-
-## 🔗 相关链接
-
-- [Cloudflare Workers文档](https://developers.cloudflare.com/workers/)
-- [Cloudflare R2文档](https://developers.cloudflare.com/r2/)
-- [Vue 3文档](https://vuejs.org/)
-- [Tailwind CSS文档](https://tailwindcss.com/)
+如有问题，请通过以下方式联系：
+- GitHub Issues
+- Email: your-email@example.com

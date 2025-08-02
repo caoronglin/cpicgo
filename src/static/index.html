@@ -6,32 +6,865 @@
     <title>Cpicgo - 现代图床</title>
     <link href="https://cdn.tailwindcss.com" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style type="text/tailwindcss">
+    <style>
+        /* 简约图床界面样式 */
+
+        /* 基础变量定义 */
+        :root {
+          /* 主色调 */
+          --primary: #4f46e5;
+          --primary-light: #818cf8;
+          --primary-dark: #3730a3;
+
+          /* 辅助色 */
+          --secondary: #7c3aed;
+          --accent: #8b5cf6; /* 强调色：紫色 */
+
+          /* 状态色 */
+          --success: #10b981;
+          --warning: #f59e0b;
+          --error: #ef4444;
+
+          /* 灰色调 */
+          --gray-50: #f9fafb;
+          --gray-100: #f3f4f6;
+          --gray-200: #e5e7eb;
+          --gray-300: #d1d5db;
+          --gray-400: #9ca3af;
+          --gray-500: #6b7280;
+          --gray-600: #4b5563;
+          --gray-700: #374151;
+          --gray-800: #1f2937;
+          --gray-900: #111827;
+
+          /* 背景色和文本色 */
+          --bg-primary: #ffffff;
+          --bg-secondary: #f9fafb;
+          --text-primary: #111827;
+          --text-secondary: #4b5563;
+          --text-light: #f3f4f6;
+
+          /* 边框和阴影 */
+          --border-color: #e5e7eb;
+          --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+          --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* 大阴影 */
+          --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* 超大阴影 */
+
+          /* 圆角和过渡 */
+          --radius-md: 0.5rem;
+          --radius-lg: 0.75rem;
+          --radius-xl: 1rem;
+          --radius-full: 9999px; /* 全圆角 */
+          --transition: 200ms ease-in-out;
+          --transition-fast: 100ms ease-in-out;
+          --transition-slow: 300ms ease-in-out;
+        }
+
+        /* 深色模式支持 */
+        .dark {
+          --bg-primary: #111827;
+          --bg-secondary: #1f2937;
+          --text-primary: #ffffff;
+          --text-secondary: #d1d5db;
+          --border-color: #374151;
+        }
+
+        /* 全局样式重置 */
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background-color: #f8fafc;
+          min-height: 100vh;
+          color: var(--text-primary);
+          line-height: 1.6;
+          transition: background-color var(--transition), color var(--transition);
+        }
+
+        /* 玻璃拟态效果简化版 */
+        .glass {
+          background: rgba(255, 255, 255, 0.8);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          box-shadow: var(--shadow-md);
+          transition: all var(--transition);
+        }
+
+        .dark .glass {
+          background: rgba(17, 24, 39, 0.8);
+          border: 1px solid rgba(75, 85, 99, 0.3);
+        }
+
+        /* 卡片样式 */
+        .card {
+          background: var(--bg-primary);
+          border-radius: var(--radius-xl);
+          box-shadow: var(--shadow-md);
+          transition: transform var(--transition), box-shadow var(--transition);
+          overflow: hidden;
+        }
+
+        .card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 按钮样式 */
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.75rem 1.25rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          border-radius: var(--radius-lg);
+          border: none;
+          cursor: pointer;
+          transition: all var(--transition);
+          gap: 0.5rem;
+        }
+
+        .btn-primary {
+          background-color: var(--primary);
+          color: white;
+        }
+
+        .btn-primary:hover {
+          background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+          background-color: var(--bg-secondary);
+          color: var(--text-primary);
+          border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+          background-color: var(--gray-100);
+        }
+
+        .dark .btn-secondary:hover {
+          background-color: var(--gray-700);
+        }
+
+        /* 输入框样式 */
+        .input {
+          width: 100%;
+          padding: 0.75rem 1rem;
+          border: 1px solid var(--border-color);
+          border-radius: var(--radius-lg);
+          background-color: var(--bg-secondary);
+          color: var(--text-primary);
+          transition: border-color var(--transition);
+        }
+
+        .input:focus {
+          outline: none;
+          border-color: var(--primary);
+        }
+
+        /* 上传区域样式 */
+        .upload-zone {
+          border: 2px dashed var(--border-color);
+          border-radius: var(--radius-xl);
+          transition: all var(--transition);
+          background-color: var(--bg-secondary);
+          padding: 2rem;
+          text-align: center;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+          border-color: var(--primary);
+          background-color: rgba(79, 70, 229, 0.05);
+        }
+
+        /* 图片网格样式增强 */
+        .image-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          gap: 1.5rem;
+          margin-top: 2rem;
+          padding: 0.5rem;
+        }
+
+        .image-card {
+          position: relative;
+          border-radius: var(--radius-lg);
+          overflow: hidden;
+          aspect-ratio: 1;
+          background-color: var(--bg-secondary);
+          transition: all var(--transition-slow);
+          cursor: pointer;
+          box-shadow: var(--shadow-md);
+          border: 1px solid var(--border-color);
+        }
+
+        .image-card:hover {
+          transform: translateY(-5px) scale(1.02);
+          box-shadow: var(--shadow-xl);
+          z-index: 10;
+          border-color: var(--primary-light);
+        }
+
+        .image-card img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform var(--transition-slow);
+        }
+
+        .image-card:hover img {
+          transform: scale(1.05);
+        }
+
+        .image-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+          opacity: 0;
+          transition: opacity var(--transition);
+          display: flex;
+          align-items: flex-end;
+          padding: 1rem;
+        }
+
+        .image-card:hover .image-overlay {
+          opacity: 1;
+        }
+
+        .image-info {
+          color: white;
+          width: 100%;
+        }
+
+        .image-title {
+          font-size: 0.875rem;
+          font-weight: 600;
+          margin-bottom: 0.25rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        /* 统计卡片样式 */
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 1rem;
+          margin-bottom: 2rem;
+        }
+
+        .stat-card {
+          background-color: var(--bg-primary);
+          padding: 1.25rem;
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-sm);
+        }
+
+        .stat-icon {
+          width: 2.5rem;
+          height: 2.5rem;
+          border-radius: var(--radius-md);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.125rem;
+          margin-bottom: 0.75rem;
+          background-color: rgba(79, 70, 229, 0.1);
+          color: var(--primary);
+        }
+
+        .stat-value {
+          font-size: 1.75rem;
+          font-weight: 700;
+          margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+          color: var(--text-secondary);
+          font-size: 0.875rem;
+        }
+
+        /* 动画效果简化 */
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fadeIn 0.4s ease-out;
+        }
+
+        /* 进度条样式 */
+        .progress-bar {
+          height: 0.5rem;
+          border-radius: 0.25rem;
+          background-color: var(--gray-200);
+          overflow: hidden;
+        }
+
+        .progress-fill {
+          height: 100%;
+          background-color: var(--primary);
+          transition: width var(--transition);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+          .image-grid {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.75rem;
+          }
+
+          .stats-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .image-grid {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+          }
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* 空状态样式 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+
+        /* 动画效果扩展 */
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .animate-scale-in {
+            animation: scaleIn 0.3s ease-out forwards;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* 加载动画 */
+        .loading-spinner {
+          display: inline-block;
+          width: 1.5rem;
+          height: 1.5rem;
+          border: 2px solid var(--border-color);
+          border-radius: 50%;
+          border-top-color: var(--primary);
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        /* Tailwind 自定义工具类 */
         @layer utilities {
             .content-auto {
                 content-visibility: auto;
             }
-            .glass {
-                @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg border border-white/50 dark:border-gray-800/50 shadow-lg transition-all duration-300;
-            }
             .glass-hover {
-                @apply hover:bg-white/80 dark:hover:bg-gray-900/80 hover:shadow-xl;
+                @apply hover:shadow-lg;
             }
-            .btn-primary {
-                @apply px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg shadow-md hover:from-indigo-700 hover:to-purple-700 transition-all duration-300;
-            }
-            .btn-secondary {
-                @apply px-4 py-2 bg-white/50 dark:bg-gray-800/50 rounded-lg shadow-md hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all duration-300;
-            }
-            .card {
-                @apply glass rounded-xl overflow-hidden glass-hover;
-            }
+        }
+
+        /* 标签样式 */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.3125rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background-color: var(--gray-100);
+            color: var(--text-primary);
+            transition: all var(--transition);
+        }
+
+        .dark .tag {
+            background-color: var(--gray-800);
+            color: var(--gray-200);
+        }
+
+        .tag-primary {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+        }
+
+        .tag-accent {
+            background-color: rgba(139, 92, 246, 0.1);
+            color: var(--accent);
+        }
+
+        /* 输入框相关样式 */
+        .input-label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+        }
+
+        /* 按钮图标样式 */
+        .btn-icon {
+            width: 2.25rem;
+            height: 2.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        /* 按钮轮廓样式 */
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--gray-100);
+        }
+
+        .dark .btn-outline:hover {
+            background-color: var(--gray-800);
+        }
+
+        /* 图片预览模态框增强 */
+        #preview-modal {
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
+
+        #preview-modal.active {
+            opacity: 1;
+        }
+
+        #preview-modal-content {
+            transform: scale(0.95);
+            transition: transform 0.3s ease-out;
+        }
+
+        #preview-modal.active #preview-modal-content {
+            transform: scale(1);
+        }
+
+        #close-preview {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        #close-preview:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        #preview-image {
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .preview-details {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #preview-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .preview-meta {
+            margin-bottom: 1.5rem;
+        }
+
+        .preview-meta div {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .preview-meta span:first-child {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .preview-meta span:last-child {
+            color: white;
+            font-weight: 500;
+        }
+
+        #preview-url {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 8px 0 0 8px;
+            width: 100%;
+        }
+
+        #copy-url {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        #copy-url:hover {
+            background: var(--primary-dark);
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .preview-actions button {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        #download-image {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        #download-image:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #delete-image {
+            background: #ef4444;
+            color: white;
+        }
+
+        #delete-image:hover {
+            background: #dc2626;
+        }
+
+        /* 图片操作按钮样式 */
+        #zoom-in, #zoom-out, #rotate-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        #zoom-in:hover, #zoom-out:hover, #rotate-image:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        /* 添加标签弹窗样式 */
+        #add-tag-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(23, 25, 35, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            z-index: 60;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        #add-tag-modal.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        #tag-input {
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        #tag-modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        #cancel-tag {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        #cancel-tag:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        #confirm-tag {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        #confirm-tag:hover {
+            background: #4338ca;
+        }
+
+        /* 分享图片弹窗样式 */
+        #share-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(23, 25, 35, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            z-index: 60;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        #share-modal.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .share-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .share-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .share-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+        }
+
+        .share-icon.email {
+            background: #ea4335;
+        }
+
+        .share-icon.link {
+            background: #34a853;
+        }
+
+        .share-icon.twitter {
+            background: #1da1f2;
+        }
+
+        .share-icon.facebook {
+            background: #4267b2;
+        }
+
+        .share-title {
+            font-weight: 500;
+        }
+
+        .share-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        #share-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #share-close:hover {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        /* 图片标签样式 */
+        .preview-tags .tag {
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .preview-tags .tag .remove-tag {
+            margin-left: 6px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .preview-tags .tag .remove-tag:hover {
+            color: white;
+        }
+
+        /* URL类型选择器样式 */
+        #url-type {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 6px 0 0 6px;
+            padding: 10px 16px;
+        }
+
+        #preview-url {
+            border-radius: 0;
+        }
+
+        #copy-url {
+            border-radius: 0 6px 6px 0;
+        }
+
+        #url-copied {
+            transition: opacity 0.3s ease;
+        }
+
+        /* 增强分享按钮样式 */
+        #share-image {
+            background: #4f46e5;
+            color: white;
+            border: none;
+        }
+
+        #share-image:hover {
+            background: #4338ca;
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-slate-800 min-h-screen text-gray-800 dark:text-gray-100 transition-colors duration-300">
+<body class="min-h-screen text-gray-800 dark:text-gray-100 transition-colors duration-300">
     <div id="app" class="min-h-screen">
         <!-- 顶部导航栏 -->
         <header class="sticky top-0 z-50 glass px-4 md:px-6 py-3 transition-all duration-300" id="navbar">
@@ -106,13 +939,37 @@
                         <p class="text-gray-500 dark:text-gray-400 max-w-md mx-auto">最大文件大小: 10MB</p>
                     </div>
                 </div>
-                <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
                     <label for="file-input" class="btn-primary cursor-pointer flex items-center justify-center w-full sm:w-auto">
                         <i class="fas fa-upload mr-2"></i>选择图片
                     </label>
                     <button id="paste-btn" class="btn-secondary flex items-center justify-center w-full sm:w-auto">
                         <i class="fas fa-clipboard mr-2"></i>粘贴图片
                     </button>
+                    <button id="url-upload-btn" class="btn-outline flex items-center justify-center w-full sm:w-auto">
+                        <i class="fas fa-link mr-2"></i>URL上传
+                    </button>
+                </div>
+
+                <!-- 上传设置 -->
+                <div class="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-gray-200 dark:border-gray-700 mb-6 animate-scale-in">
+                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">上传设置</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="folder-select" class="block text-xs text-gray-500 dark:text-gray-400 mb-1">上传到文件夹</label>
+                            <select id="folder-select" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="">根目录</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="naming-pattern" class="block text-xs text-gray-500 dark:text-gray-400 mb-1">命名规则</label>
+                            <select id="naming-pattern" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="original">保持原文件名</option>
+                                <option value="timestamp">时间戳命名</option>
+                                <option value="random">随机字符串</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <input type="file" id="file-input" multiple accept="image/*" class="hidden">
 
@@ -127,8 +984,19 @@
                 </div>
             </section>
 
+            <!-- 功能标签 -->
+            <section class="mb-8 animate-fade-in" style="animation-delay: 0.2s">
+                <div class="flex flex-wrap gap-2">
+                    <span class="tag tag-primary"><i class="fas fa-check-circle mr-1"></i>支持多格式</span>
+                    <span class="tag"><i class="fas fa-cloud mr-1"></i>云端存储</span>
+                    <span class="tag"><i class="fas fa-bolt mr-1"></i>高速上传</span>
+                    <span class="tag"><i class="fas fa-lock mr-1"></i>隐私保护</span>
+                    <span class="tag-accent"><i class="fas fa-rocket mr-1"></i>CDN加速</span>
+                </div>
+            </section>
+
             <!-- 统计信息 -->
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-in" style="animation-delay: 0.3s">
                 <div class="card p-6 glass-hover animate-fade-in" style="animation-delay: 0.1s">
                     <div class="flex items-center justify-between">
                         <div>
@@ -181,28 +1049,96 @@
                 </div>
             </section>
 
-            <!-- 搜索和过滤 -->
+            <!-- 搜索和高级过滤 -->
             <section class="card p-4 mb-6 animate-fade-in" style="animation-delay: 0.6s">
-                <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
+                <div class="flex flex-col space-y-4">
+                    <!-- 基础搜索 -->
                     <div class="relative flex-1">
-                        <input type="text" id="search-input" placeholder="搜索图片..." class="w-full px-4 py-2 pl-10 rounded-lg bg-white/50 dark:bg-gray-800/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
-                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="search-input" placeholder="搜索图片..." class="w-full px-4 py-2 pl-10 rounded-lg bg-white/50 dark:bg-gray-800/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300 input">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 input-icon"></i>
                     </div>
-                    <div class="flex items-center space-x-4 w-full md:w-auto">
-                        <select id="folder-filter" class="w-full md:w-auto px-4 py-2 rounded-lg bg-white/50 dark:bg-gray-800/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
-                            <option value="">所有文件夹</option>
-                        </select>
-                        <select id="sort-filter" class="w-full md:w-auto px-4 py-2 rounded-lg bg-white/50 dark:bg-gray-800/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
-                            <option value="newest">最新上传</option>
-                            <option value="oldest">最早上传</option>
-                            <option value="name-asc">名称 A-Z</option>
-                            <option value="name-desc">名称 Z-A</option>
-                            <option value="size-asc">大小 从小到大</option>
-                            <option value="size-desc">大小 从大到小</option>
-                        </select>
+
+                    <!-- 高级过滤 -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <label for="folder-filter" class="block text-xs text-gray-500 dark:text-gray-400 mb-1 input-label">文件夹</label>
+                            <select id="folder-filter" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 input">
+                                <option value="">所有文件夹</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="type-filter" class="block text-xs text-gray-500 dark:text-gray-400 mb-1 input-label">文件类型</label>
+                            <select id="type-filter" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 input">
+                                <option value="">所有类型</option>
+                                <option value="jpg">JPG</option>
+                                <option value="png">PNG</option>
+                                <option value="webp">WebP</option>
+                                <option value="svg">SVG</option>
+                                <option value="avif">AVIF</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="date-filter" class="block text-xs text-gray-500 dark:text-gray-400 mb-1 input-label">上传日期</label>
+                            <select id="date-filter" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 input">
+                                <option value="">所有时间</option>
+                                <option value="today">今天</option>
+                                <option value="yesterday">昨天</option>
+                                <option value="week">本周</option>
+                                <option value="month">本月</option>
+                                <option value="custom">自定义</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="sort-filter" class="block text-xs text-gray-500 dark:text-gray-400 mb-1 input-label">排序方式</label>
+                            <select id="sort-filter" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 input">
+                                <option value="newest">最新上传</option>
+                                <option value="oldest">最早上传</option>
+                                <option value="name-asc">名称 A-Z</option>
+                                <option value="name-desc">名称 Z-A</option>
+                                <option value="size-asc">大小 从小到大</option>
+                                <option value="size-desc">大小 从大到小</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </section>
+
+            <!-- 批量操作工具栏 -->
+            <section id="batch-toolbar" class="card p-4 mb-6 hidden animate-scale-in">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-2">
+                        <button id="batch-delete" class="btn btn-secondary btn-icon" title="删除所选">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button id="batch-move" class="btn btn-secondary btn-icon" title="移动到文件夹">
+                            <i class="fas fa-folder-open"></i>
+                        </button>
+                        <button id="batch-download" class="btn btn-secondary btn-icon" title="下载所选">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button id="batch-share" class="btn btn-secondary btn-icon" title="分享所选">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                        <span id="batch-count" class="text-sm text-gray-600 dark:text-gray-400">已选择 <span class="font-medium">0</span> 项</span>
+                    </div>
+                    <button id="cancel-selection" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                        取消选择
+                    </button>
+                </div>
+            </section>
+
+            <!-- 视图切换 -->
+            <div class="flex justify-between items-center mb-4 animate-fade-in" style="animation-delay: 0.65s">
+                <h2 class="text-xl font-bold">图片库</h2>
+                <div class="flex items-center gap-2">
+                    <button id="grid-view" class="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button id="list-view" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
 
             <!-- 图片网格 -->
             <section id="image-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 animate-fade-in" style="animation-delay: 0.7s">
@@ -211,6 +1147,9 @@
 
             <!-- 空状态 -->
             <section id="empty-state" class="empty-state card p-8 text-center hidden animate-fade-in" style="animation-delay: 0.8s">
+                <div class="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center animate-float">
+                    <i class="fas fa-cloud-upload-alt text-5xl text-indigo-500 dark:text-indigo-400"></i>
+                </div>
                 <div class="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 rounded-full flex items-center justify-center">
                     <i class="fas fa-cloud-upload-alt text-5xl text-gray-500 dark:text-gray-400"></i>
                 </div>
@@ -257,45 +1196,91 @@
         </div>
 
         <!-- 图片预览模态框 -->
-        <div id="preview-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden animate-fade-in">
+        <div id="preview-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
             <div class="max-w-6xl w-full h-full p-4 flex items-center justify-center" id="preview-modal-content">
-                <button id="close-preview" class="absolute top-4 right-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors duration-300 z-10">
-                    <i class="fas fa-times"></i>
+                <button id="close-preview" class="absolute top-6 right-6 z-10">
+                    <i class="fas fa-times text-white text-xl"></i>
                 </button>
-                <div class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6 max-w-full max-h-full overflow-hidden">
-                    <div class="flex-1 max-w-md md:max-w-lg lg:max-w-xl relative">
-                        <img id="preview-image" src="" alt="预览图片" class="max-w-full max-h-[70vh] object-contain rounded-lg">
+                <div class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8 max-w-full max-h-full overflow-hidden">
+                    <div class="flex-1 max-w-md md:max-w-2xl lg:max-w-3xl relative animate-scale-in">
+                        <img id="preview-image" src="" alt="预览图片" class="max-w-full max-h-[75vh] object-contain">
+                        <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center bg-gradient-to-t from-black/70 to-transparent p-4 rounded-b-lg">
+                            <div class="text-white">
+                                <h4 id="preview-filename" class="font-medium"></h4>
+                                <p id="preview-dimensions" class="text-sm text-white/70"></p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button id="zoom-in" class="w-10 h-10 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30 transition-colors">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                                <button id="zoom-out" class="w-10 h-10 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30 transition-colors">
+                                    <i class="fas fa-search-minus"></i>
+                                </button>
+                                <button id="rotate-image" class="w-10 h-10 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30 transition-colors">
+                                    <i class="fas fa-rotate-right"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="w-full md:w-80 bg-white/10 backdrop-blur-md rounded-lg p-4 max-h-[70vh] overflow-y-auto">
-                        <h3 id="preview-title" class="text-xl font-semibold mb-2"></h3>
-                        <div class="space-y-4 mb-6">
-                            <div class="flex justify-between text-sm">
+                    <div class="w-full md:w-96 preview-details animate-scale-in" style="animation-delay: 0.1s">
+                        <h3 id="preview-title" class="text-xl font-semibold mb-4"></h3>
+                        <div class="preview-meta mb-6">
+                            <div>
                                 <span>文件大小:</span>
                                 <span id="preview-size"></span>
                             </div>
-                            <div class="flex justify-between text-sm">
+                            <div>
                                 <span>上传时间:</span>
                                 <span id="preview-time"></span>
                             </div>
-                            <div class="flex justify-between text-sm">
+                            <div>
                                 <span>文件类型:</span>
                                 <span id="preview-type"></span>
                             </div>
-                            <div class="pt-2 border-t border-white/20">
-                                <label class="block text-sm font-medium mb-1">图片链接</label>
-                                <div class="flex items-center">
-                                    <input type="text" id="preview-url" class="flex-1 px-3 py-2 rounded-l-lg bg-white/5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500" readonly>
+                            <div>
+                                <span>分辨率:</span>
+                                <span id="preview-res"></span>
+                            </div>
+                            <div class="pt-2 border-t border-white/20 mt-2">
+                                <label class="block text-sm font-medium mb-2 text-white/70">所在文件夹</label>
+                                <div class="flex items-center space-x-2 mb-4">
+                                    <i class="fas fa-folder text-indigo-400"></i>
+                                    <span id="preview-folder"></span>
+                                </div>
+                            </div>
+                            <div class="pt-2 border-t border-white/20 mt-2">
+                                <label class="block text-sm font-medium mb-2 text-white/70">图片标签</label>
+                                <div id="preview-tags" class="flex flex-wrap gap-2 mb-4"></div>
+                                <button id="add-tag" class="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
+                                    <i class="fas fa-plus mr-1"></i> 添加标签
+                                </button>
+                            </div>
+                            <div class="pt-2 border-t border-white/20 mt-2">
+                                <label class="block text-sm font-medium mb-2 text-white/70">图片链接</label>
+                                <div class="flex items-center mb-2">
+                                    <select id="url-type" class="bg-white/5 border border-white/10 text-white rounded-l-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 w-32">
+                                        <option value="direct">直接链接</option>
+                                        <option value="markdown">Markdown</option>
+                                        <option value="html">HTML</option>
+                                    </select>
+                                    <input type="text" id="preview-url" class="flex-1 px-3 py-2 bg-white/5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 text-white">
                                     <button id="copy-url" class="px-3 py-2 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 transition-colors duration-300">
                                         <i class="fas fa-copy"></i>
                                     </button>
                                 </div>
+                                <div id="url-copied" class="text-green-400 text-xs hidden">
+                                    已复制到剪贴板
+                                </div>
                             </div>
                         </div>
-                        <div class="flex space-x-3">
-                            <button id="download-image" class="flex-1 px-4 py-2 btn-secondary text-sm">
+                        <div class="preview-actions">
+                            <button id="download-image" class="flex-1 px-4 py-2">
                                 <i class="fas fa-download mr-1"></i> 下载
                             </button>
-                            <button id="delete-image" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-md transition-colors duration-300 text-sm">
+                            <button id="share-image" class="flex-1 px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
+                                <i class="fas fa-share-alt mr-1"></i> 分享
+                            </button>
+                            <button id="delete-image" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white transition-colors">
                                 <i class="fas fa-trash mr-1"></i> 删除
                             </button>
                         </div>
@@ -304,6 +1289,72 @@
             </div>
         </div>
     </div>
+
+        <!-- 添加标签弹窗 -->
+        <div id="add-tag-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+            <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+            <div class="relative bg-gray-900 text-white rounded-xl shadow-2xl p-6 max-w-md w-full">
+                <h3 class="text-xl font-semibold mb-4">添加标签</h3>
+                <input type="text" id="tag-input" placeholder="输入标签名称..." class="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <div id="tag-modal-actions" class="flex mt-4">
+                    <button id="cancel-tag" class="flex-1 px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                        取消
+                    </button>
+                    <button id="confirm-tag" class="flex-1 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
+                        确认
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分享图片弹窗 -->
+        <div id="share-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+            <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+            <div class="relative bg-gray-900 text-white rounded-xl shadow-2xl p-6 max-w-lg w-full">
+                <button id="share-close" class="absolute top-4 right-4 text-white hover:text-gray-300">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h3 class="text-xl font-semibold mb-6">分享图片</h3>
+                <div class="space-y-3">
+                    <div class="share-option" data-option="email">
+                        <div class="share-icon email">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <div class="share-title">通过邮件分享</div>
+                            <div class="share-description">发送图片链接到指定邮箱</div>
+                        </div>
+                    </div>
+                    <div class="share-option" data-option="link">
+                        <div class="share-icon link">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <div>
+                            <div class="share-title">复制链接</div>
+                            <div class="share-description">复制图片的公开链接</div>
+                        </div>
+                    </div>
+                    <div class="share-option" data-option="twitter">
+                        <div class="share-icon twitter">
+                            <i class="fab fa-twitter"></i>
+                        </div>
+                        <div>
+                            <div class="share-title">分享到Twitter</div>
+                            <div class="share-description">直接分享到你的Twitter账号</div>
+                        </div>
+                    </div>
+                    <div class="share-option" data-option="facebook">
+                        <div class="share-icon facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </div>
+                        <div>
+                            <div class="share-title">分享到Facebook</div>
+                            <div class="share-description">直接分享到你的Facebook账号</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     <!-- 通知组件 -->
     <div id="notifications" class="fixed top-0 right-0 p-4 z-50"></div>

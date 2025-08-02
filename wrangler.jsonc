@@ -6,13 +6,13 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "cpicgo",
 	"main": "src/index.js",
-	"compatibility_date": "2025-07-31",
+	"compatibility_date": "2024-01-01",
 	"compatibility_flags": ["nodejs_compat"],
 	"observability": {
 		"enabled": true
 	},
 	"assets": {
-		"directory": "./src/static",
+		"directory": "./client/dist",
 		"binding": "ASSETS",
 		"html_handling": "drop-trailing-slash"
 	},
@@ -50,10 +50,9 @@
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
 	 */
 	"vars": {
-		"CUSTOM_DOMAIN": "cpicgo.luoxing.workers.dev",
-		"CDN_DOMAIN": "img.cnortles.top",
-		"CUSTOM_PATH": "uploads",
-		"API_TOKEN": "tk_7x8z9a2b3c4d5e6f"
+		"ENVIRONMENT": "production",
+		"CUSTOM_DOMAIN": "img.837838.xyz",
+		"CDN_DOMAIN": "img.cnortles.top"
 	},
 	"r2_buckets": [
 		{

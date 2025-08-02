@@ -134,7 +134,7 @@ class ApiClient {
 
                 xhr.open('PUT', `${this.baseUrl}/${fileName}`);
                 xhr.setRequestHeader('Authorization', `Bearer ${StateManager.getToken()}`);
-                xhr.send(file);
+                xhr.send(formData);
             });
         } catch (error) {
             console.error('上传图片失败:', error);

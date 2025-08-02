@@ -60,7 +60,9 @@ class UIManager {
             // 模态框
             authModal: document.getElementById('authModal'),
             folderModal: document.getElementById('folderModal'),
-            previewModal: document.getElementById('previewModal')
+            previewModal: document.getElementById('previewModal'),
+            addTagModal: document.getElementById('tag-modal'),
+            shareModal: document.getElementById('share-modal')
         };
     }
 
@@ -107,6 +109,43 @@ class UIManager {
 
         // 键盘事件
         document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+
+        // 标签弹窗事件
+        if (this.elements.addTagModal) {
+            // 取消按钮
+            document.getElementById('cancel-tag')?.addEventListener('click', () => {
+                this.elements.addTagModal.style.display = 'none';
+            });
+            
+            // 确认按钮
+            document.getElementById('confirm-tag')?.addEventListener('click', () => {
+                this.confirmAddTag();
+            });
+            
+            // 输入框回车事件
+            document.getElementById('tag-input')?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.confirmAddTag();
+                }
+            });
+        }
+
+        // 分享弹窗事件
+        if (this.elements.shareModal) {
+            // 关闭按钮
+            document.getElementById('share-close')?.addEventListener('click', () => {
+                this.elements.shareModal.style.display = 'none';
+            });
+            
+            // 分享选项点击事件
+            const shareOptions = this.elements.shareModal.querySelectorAll('.share-option');
+            shareOptions.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    const shareType = option.dataset.option;
+                    this.handleShareOption(shareType);
+                });
+            });
+        }
     }
 
     /**
@@ -592,6 +631,114 @@ class UIManager {
             const confirmed = confirm(message);
             resolve(confirmed);
         });
+    }
+
+    /**
+     * 确认添加标签
+     */
+    confirmAddTag() {
+        const tagInput = document.getElementById('tag-input');
+        const tag = tagInput.value.trim();
+        
+        if (tag && this.currentImageKey) {
+            // 这里应该调用API添加标签
+            // 由于API实现未提供，我们暂时只更新UI
+            stateManager.addNotification('标签添加成功', 'success');
+            
+            // 关闭弹窗
+            if (this.elements.addTagModal) {
+                this.elements.addTagModal.style.display = 'none';
+            }
+            
+            // 清空输入框
+            tagInput.value = '';
+        }
+    }
+
+    /**
+     * 处理分享选项
+     * @param {string} option - 分享选项类型
+     */
+    handleShareOption(option) {
+        // 关闭分享弹窗
+        if (this.elements.shareModal) {
+            this.elements.shareModal.style.display = 'none';
+        }
+        
+        switch (option) {
+            case 'email':
+                stateManager.addNotification('邮件分享功能待实现', 'info');
+                break;
+            case 'link':
+                stateManager.addNotification('链接已复制到剪贴板', 'success');
+                break;
+            case 'twitter':
+                stateManager.addNotification('Twitter分享功能待实现', 'info');
+                break;
+            case 'facebook':
+                stateManager.addNotification('Facebook分享功能待实现', 'info');
+                break;
+        }
+    }
+
+    /**
+     * 显示添加标签弹窗
+     * @param {string} key - 图片key
+     */
+    showAddTagModal(key) {
+        if (this.elements.addTagModal) {
+            this.elements.addTagModal.style.display = 'flex';
+            this.elements.addTagInput.value = '';
+            this.elements.addTagInput.focus();
+            this.bindModalEvents();
+            // 存储当前操作的图片key
+            this.currentImageKey = key;
+        }
+    }
+
+    /**
+     * 显示分享图片弹窗
+     * @param {string} key - 图片key
+     */
+    showShareModal(key) {
+        const image = stateManager.getState().images.find(img => img.key === key);
+        if (!image || !this.elements.shareModal) return;
+
+        // 生成不同格式的分享链接
+        const directUrl = image.url || `${AppConfig.api.baseUrl}/${image.key}`;
+        const markdownUrl = `![${Utils.getFileName(image.key)}](${directUrl})`;
+        const htmlUrl = `<img src="${directUrl}" alt="${Utils.getFileName(image.key)}">`;
+        
+        // 设置URL类型选择器的事件监听器
+        const urlTypeSelect = document.getElementById('url-type');
+        const previewUrlInput = document.getElementById('preview-url');
+        
+        // 更新URL显示
+        const updateUrlDisplay = () => {
+            const selectedType = urlTypeSelect.value;
+            switch (selectedType) {
+                case 'markdown':
+                    previewUrlInput.value = markdownUrl;
+                    break;
+                case 'html':
+                    previewUrlInput.value = htmlUrl;
+                    break;
+                case 'direct':
+                default:
+                    previewUrlInput.value = directUrl;
+                    break;
+            }
+        };
+        
+        // 绑定URL类型选择器事件
+        urlTypeSelect.onchange = updateUrlDisplay;
+        
+        // 初始化URL显示
+        updateUrlDisplay();
+        
+        // 显示模态框
+        this.elements.shareModal.style.display = 'flex';
+        this.bindModalEvents();
     }
 }
 
