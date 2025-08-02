@@ -12,7 +12,7 @@
 		"enabled": true
 	},
 	"assets": {
-		"directory": "./client/dist",
+		"directory": "./src/static",
 		"binding": "ASSETS",
 		"html_handling": "drop-trailing-slash"
 	},
@@ -52,7 +52,7 @@
 	"vars": {
 		"ENVIRONMENT": "production",
 		"CUSTOM_DOMAIN": "img.837838.xyz",
-		"CDN_DOMAIN": "img.cnortles.top"
+		"CDN_DOMAIN": "img2.cnortles.top"
 	},
 	"r2_buckets": [
 		{

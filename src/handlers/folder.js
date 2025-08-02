@@ -14,9 +14,9 @@ export const folderRoutes = {
       case 'GET':
         return await this.handleListFolders(request, env);
       case 'POST':
-        return await this.handleCreateFolder(request, env);
+        return new Response('Method not allowed', { status: 405 });
       case 'DELETE':
-        return await this.handleDeleteFolder(request, env);
+        return new Response('Method not allowed', { status: 405 });
       default:
         return new Response('Method not allowed', { status: 405 });
     }
@@ -54,65 +54,10 @@ export const folderRoutes = {
   },
 
   async handleCreateFolder(request, env) {
-    try {
-      const { name, parent = '' } = await request.json();
-
-      if (!name || typeof name !== 'string') {
-        return createCORSResponse({ error: 'Invalid folder name' }, 400);
-      }
-
-      const sanitizedName = name.replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').toLowerCase();
-      const folderPath = parent 
-        ? `${env.CUSTOM_PATH || 'uploads'}/${parent}/${sanitizedName}/`
-        : `${env.CUSTOM_PATH || 'uploads'}/${sanitizedName}/`;
-
-      // 创建文件夹标记文件
-      await env.image_host_bucket.put(`${folderPath}.folder`, new ArrayBuffer(0), {
-        httpMetadata: {
-          contentType: 'text/plain'
-        }
-      });
-
-      return createCORSResponse({
-        success: true,
-        name: sanitizedName,
-        path: folderPath,
-        message: 'Folder created successfully'
-      });
-
-    } catch (error) {
-      console.error('Error creating folder:', error);
-      return createCORSResponse({ error: error.message }, 500);
-    }
+    return new Response('Method not allowed', { status: 405 });
   },
 
   async handleDeleteFolder(request, env) {
-    try {
-      const { path } = await request.json();
-
-      if (!path) {
-        return createCORSResponse({ error: 'No folder path provided' }, 400);
-      }
-
-      // 获取文件夹内所有文件
-      const objects = await env.image_host_bucket.list({ prefix: path });
-      
-      // 删除所有文件
-      const deletePromises = (objects.objects || []).map(obj => 
-        env.image_host_bucket.delete(obj.key)
-      );
-
-      await Promise.all(deletePromises);
-
-      return createCORSResponse({
-        success: true,
-        message: 'Folder deleted successfully',
-        deletedCount: objects.objects?.length || 0
-      });
-
-    } catch (error) {
-      console.error('Error deleting folder:', error);
-      return createCORSResponse({ error: error.message }, 500);
-    }
+    return new Response('Method not allowed', { status: 405 });
   }
 };

@@ -9,6 +9,7 @@ import { imageRoutes } from './image.js';
 import { folderRoutes } from './folder.js';
 import { statsRoutes } from './stats.js';
 import { staticRoutes } from './static.js';
+import { uploadRoutes } from './upload.js';
 
 export async function handleRequest(request, env, ctx) {
   const url = new URL(request.url);
@@ -67,6 +68,8 @@ async function handleAPIRoutes(request, env, ctx) {
       return await folderRoutes.handle(request, env);
     case path.startsWith('/api/stats'):
       return await statsRoutes.handle(request, env);
+    case path.startsWith('/api/upload'):
+      return await uploadRoutes.handle(request, env);
     default:
       return new Response('API endpoint not found', {
         status: 404,
@@ -76,11 +79,12 @@ async function handleAPIRoutes(request, env, ctx) {
 }
 
 function isStaticRoute(path) {
-  return ['/', '/index.html', '/favicon.ico'].includes(path) || 
+  return ['/', '/index.html', '/favicon.ico', '/test.html'].includes(path) || 
          path.startsWith('/assets/') ||
          path.endsWith('.css') ||
          path.endsWith('.js') ||
          path.endsWith('.png') ||
          path.endsWith('.jpg') ||
-         path.endsWith('.ico');
+         path.endsWith('.ico') ||
+         path.endsWith('.html');
 }

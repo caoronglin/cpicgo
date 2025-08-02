@@ -83,7 +83,7 @@ npm install
 
 # 构建项目（如果需要）
 print_info "构建项目..."
-# npm run build  # 如果需要构建步骤
+# 移除Vite构建步骤，直接使用src/static目录
 
 # 部署到 Cloudflare Workers
 print_info "部署到 Cloudflare Workers..."
@@ -92,7 +92,7 @@ wrangler deploy --env $ENVIRONMENT
 # 部署静态资源（如果有）
 if [ -d "src/static" ]; then
     print_info "部署静态资源..."
-    wrangler pages deploy src/static --project-name="$WORKER_NAME-static" || print_warning "静态资源部署失败"
+    # 静态资源已通过wrangler.jsonc配置自动部署
 fi
 
 # 设置环境变量

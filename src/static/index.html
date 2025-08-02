@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cpicgo - 现代图床</title>
-    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="./css/tailwind.min.css" rel="stylesheet">
+    <link href="./css/fontawesome.min.css" rel="stylesheet">
+    <script src="./js/chart.min.js"></script>
     <style>
         /* 简约图床界面样式 */
 
@@ -926,8 +926,13 @@
         </div>
 
         <main class="max-w-7xl mx-auto px-4 md:px-6 py-8">
-            <!-- 上传区域 -->
-            <section class="card p-6 md:p-8 mb-8 animate-fade-in">
+            <div class="upload-area hidden">
+              <div class="upload-content">
+                <h2 class="text-2xl md:text-3xl font-bold mb-2">图片查看服务</h2>
+                <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">您可以通过管理界面上传和管理图片</p>
+              </div>
+            </div>
+            <section class="card p-6 md:p-8 mb-8 animate-fade-in" style="animation-delay: 0.2s">
                 <div class="text-center mb-8">
                     <h2 class="text-2xl md:text-3xl font-bold mb-2">上传您的图片</h2>
                     <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">支持拖拽上传或点击选择，支持 JPG, PNG, WEBP, AVIF, SVG 等格式</p>
@@ -1107,16 +1112,16 @@
             <section id="batch-toolbar" class="card p-4 mb-6 hidden animate-scale-in">
                 <div class="flex flex-wrap items-center justify-between gap-4">
                     <div class="flex items-center gap-2">
-                        <button id="batch-delete" class="btn btn-secondary btn-icon" title="删除所选">
+                        <button id="batch-delete" class="btn-secondary btn-icon" title="删除所选">
                             <i class="fas fa-trash"></i>
                         </button>
-                        <button id="batch-move" class="btn btn-secondary btn-icon" title="移动到文件夹">
+                        <button id="batch-move" class="btn-secondary btn-icon" title="移动到文件夹">
                             <i class="fas fa-folder-open"></i>
                         </button>
-                        <button id="batch-download" class="btn btn-secondary btn-icon" title="下载所选">
+                        <button id="batch-download" class="btn-secondary btn-icon" title="下载所选">
                             <i class="fas fa-download"></i>
                         </button>
-                        <button id="batch-share" class="btn btn-secondary btn-icon" title="分享所选">
+                        <button id="batch-share" class="btn-secondary btn-icon" title="分享所选">
                             <i class="fas fa-share-alt"></i>
                         </button>
                         <span id="batch-count" class="text-sm text-gray-600 dark:text-gray-400">已选择 <span class="font-medium">0</span> 项</span>
@@ -1154,10 +1159,12 @@
                     <i class="fas fa-cloud-upload-alt text-5xl text-gray-500 dark:text-gray-400"></i>
                 </div>
                 <h3 class="text-2xl font-semibold mb-3">暂无图片</h3>
-                <p class="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">开始上传您的第一张图片</p>
-                <button id="upload-btn" class="btn-primary px-6 py-3 shadow-lg">
-                    <i class="fas fa-upload mr-2"></i>上传图片
-                </button>
+                <p class="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">图片查看服务</p>
+                <div class="hidden">
+                    <button id="upload-btn" class="btn-primary px-6 py-3 shadow-lg">
+                        <i class="fas fa-upload mr-2"></i>上传图片
+                    </button>
+                </div>
             </section>
         </main>
 
@@ -1357,57 +1364,206 @@
         </div>
 
     <!-- 通知组件 -->
-    <div id="notifications" class="fixed top-0 right-0 p-4 z-50"></div>
+    <div id="notification" class="notification"></div>
 
-    <!-- 模块化JavaScript -->
-    <script src="js/config.js"></script>
-    <script src="js/utils.js?v=2.0"></script>
-    <script src="js/api.js?v=2.0"></script>
-    <script src="js/state.js?v=2.0"></script>
-    <script src="js/ui.js?v=2.0"></script>
-    <script src="js/app.js?v=2.0"></script>
     <script>
+        // 全局变量
+        const API_BASE = '/api';
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const imageGrid = document.getElementById('image-grid');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const notification = document.getElementById('notification');
+
+        // 事件监听器
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('drop', handleDrop);
+        fileInput.addEventListener('change', handleFileSelect);
+        refreshBtn.addEventListener('click', loadImages);
+
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', () => {
-            // 初始化图表
-            if (typeof Chart !== 'undefined') {
-                const ctx = document.getElementById('uploadChart');
-                if (ctx) {
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-                            datasets: [{
-                                label: '上传数量',
-                                data: [5, 10, 8, 15, 12, 20, 7],
-                                borderColor: '#6366f1',
-                                backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                                tension: 0.4,
-                                fill: true
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'top',
-                                },
-                                tooltip: {
-                                    mode: 'index',
-                                    intersect: false,
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
-                            }
-                        }
+            loadImages();
+        });
+
+        // 拖拽事件处理
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.add('border-indigo-500', 'bg-indigo-50/50');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.remove('border-indigo-500', 'bg-indigo-50/50');
+            
+            const files = e.dataTransfer.files;
+            if (files.length) {
+                uploadFiles(files);
+            }
+        }
+
+        // 文件选择处理
+        function handleFileSelect(e) {
+            if (e.target.files.length) {
+                uploadFiles(e.target.files);
+            }
+        }
+
+        // 上传文件
+        async function uploadFiles(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                // 验证文件类型
+                if (!file.type.startsWith('image/')) {
+                    showNotification('请只上传图片文件', 'error');
+                    continue;
+                }
+
+                // 创建FormData
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    // 显示上传进度
+                    showProgress();
+                    
+                    // 上传文件
+                    const response = await fetch(`${API_BASE}/upload`, {
+                        method: 'POST',
+                        body: formData
                     });
+
+                    if (!response.ok) {
+                        throw new Error(`上传失败: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    // 隐藏进度条
+                    hideProgress();
+                    
+                    // 显示成功通知
+                    showNotification(`图片上传成功`);
+                    
+                    // 重新加载图片列表
+                    loadImages();
+                } catch (error) {
+                    console.error('上传错误:', error);
+                    hideProgress();
+                    showNotification(`上传失败: ${error.message}`, 'error');
                 }
             }
-        });
+        }
+
+        // 显示上传进度
+        function showProgress() {
+            const progressBar = document.getElementById('upload-progress');
+            progressBar.classList.remove('hidden');
+        }
+
+        // 隐藏上传进度
+        function hideProgress() {
+            const progressBar = document.getElementById('upload-progress');
+            progressBar.classList.add('hidden');
+            const progressFill = document.querySelector('.progress-bar');
+            progressFill.style.width = '0%';
+        }
+
+        // 加载图片列表
+        async function loadImages() {
+            try {
+                const response = await fetch(`${API_BASE}/images`);
+                if (!response.ok) {
+                    throw new Error(`获取图片列表失败: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                renderImages(data.images);
+            } catch (error) {
+                console.error('加载图片错误:', error);
+                showNotification(`加载图片失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 渲染图片列表
+        function renderImages(images) {
+            if (!images || images.length === 0) {
+                imageGrid.innerHTML = `
+                    <div class="text-center col-span-full py-12 text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-images text-4xl mb-4"></i>
+                        <p>暂无图片，请先上传图片</p>
+                    </div>
+                `;
+                return;
+            }
+
+            imageGrid.innerHTML = images.map(image => `
+                <div class="image-card bg-white dark:bg-gray-800/50" data-key="${image.key}">
+                    <img src="${image.cdnUrl || image.url}" alt="${image.name}" loading="lazy">
+                    <div class="image-info">
+                        <h3>${image.name}</h3>
+                        <div class="image-meta">
+                            <span>${image.sizeFormatted}</span>
+                            <span>${new Date(image.uploaded).toLocaleDateString('zh-CN')}</span>
+                        </div>
+                        <div class="image-actions">
+                            <button class="copy-btn" onclick="copyUrl('${image.cdnUrl || image.url}')">
+                                <i class="fas fa-copy"></i> 复制
+                            </button>
+                            <button class="delete-btn" onclick="deleteImage('${image.key}')">
+                                <i class="fas fa-trash"></i> 删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 复制URL到剪贴板
+        async function copyUrl(url) {
+            try {
+                await navigator.clipboard.writeText(url);
+                showNotification('URL已复制到剪贴板');
+            } catch (error) {
+                console.error('复制失败:', error);
+                showNotification('复制失败', 'error');
+            }
+        }
+
+        // 删除图片
+        async function deleteImage(key) {
+            if (!confirm('确定要删除这张图片吗？')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/images/${key}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`删除失败: ${response.status}`);
+                }
+                
+                showNotification('图片删除成功');
+                loadImages(); // 重新加载图片列表
+            } catch (error) {
+                console.error('删除错误:', error);
+                showNotification(`删除失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
     </script>
 </body>
 </html>

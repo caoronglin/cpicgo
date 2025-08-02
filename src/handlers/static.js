@@ -2,16 +2,14 @@
  * 静态资源路由处理器
  */
 
-import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
-
 export const staticRoutes = {
   async handle(request, env) {
     const url = new URL(request.url);
     const path = url.pathname;
 
     try {
-      // 使用KV Asset Handler处理静态资源
-      return await getAssetFromKV(request, env);
+      // 使用Cloudflare Assets绑定处理静态资源
+      return await env.ASSETS.fetch(request);
     } catch (error) {
       console.error('Error serving static asset:', error);
       

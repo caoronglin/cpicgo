@@ -15,9 +15,9 @@ export const imageRoutes = {
       case 'GET':
         return await this.handleList(request, env);
       case 'POST':
-        return await this.handleUpload(request, env);
+        return new Response('Method not allowed', { status: 405 });
       case 'DELETE':
-        return await this.handleDelete(request, env);
+        return new Response('Method not allowed', { status: 405 });
       default:
         return new Response('Method not allowed', { status: 405 });
     }
@@ -75,88 +75,11 @@ export const imageRoutes = {
   },
 
   async handleUpload(request, env) {
-    try {
-      const contentType = request.headers.get('content-type') || '';
-      let fileBuffer;
-      let fileName;
-      let folder = '';
-
-      if (contentType.includes('multipart/form-data')) {
-        const formData = await request.formData();
-        const file = formData.get('file') || formData.get('image');
-        folder = formData.get('folder') || '';
-        
-        if (!file) {
-          return createCORSResponse({ error: 'No file provided' }, 400);
-        }
-
-        fileBuffer = await file.arrayBuffer();
-        fileName = file.name || 'unnamed';
-      } else {
-        fileBuffer = await request.arrayBuffer();
-        fileName = `image-${Date.now()}`;
-      }
-
-      // 验证文件大小
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      if (fileBuffer.byteLength > maxSize) {
-        return createCORSResponse({ error: 'File too large' }, 413);
-      }
-
-      // 生成文件名
-      const extension = getFileExtension(fileName);
-      const newFileName = generateFileName(fileName, extension);
-      const storageKey = folder 
-        ? `${env.CUSTOM_PATH || 'uploads'}/${folder}/${newFileName}`
-        : `${env.CUSTOM_PATH || 'uploads'}/${newFileName}`;
-
-      // 上传文件
-      await env.image_host_bucket.put(storageKey, fileBuffer, {
-        httpMetadata: {
-          contentType: `image/${extension}`,
-          cacheControl: 'public, max-age=31536000'
-        }
-      });
-
-      const realDomain = env.CUSTOM_DOMAIN || 'localhost';
-      // 确保cdnDomain不包含协议前缀
-      const rawCdnDomain = env.CDN_DOMAIN || realDomain;
-      const cdnDomain = rawCdnDomain.replace(/^https?:\/\//, '');
-      
-      const imageUrl = `https://${realDomain.replace(/^https?:\/\//, '')}/${storageKey}`;
-      const cdnUrl = `https://${cdnDomain}/${storageKey}`;
-
-      return createCORSResponse({
-        success: true,
-        key: storageKey,
-        url: imageUrl,
-        cdnUrl: cdnUrl,
-        name: newFileName,
-        size: fileBuffer.byteLength,
-        sizeFormatted: formatFileSize(fileBuffer.byteLength)
-      });
-
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      return createCORSResponse({ error: error.message }, 500);
-    }
+    return new Response('Method not allowed', { status: 405 });
   },
 
   async handleDelete(request, env) {
-    const url = new URL(request.url);
-    const key = url.searchParams.get('key');
-
-    if (!key) {
-      return createCORSResponse({ error: 'No key provided' }, 400);
-    }
-
-    try {
-      await env.image_host_bucket.delete(key);
-      return createCORSResponse({ success: true, message: 'Image deleted successfully' });
-    } catch (error) {
-      console.error('Error deleting image:', error);
-      return createCORSResponse({ error: error.message }, 500);
-    }
+    return new Response('Method not allowed', { status: 405 });
   },
 
   async handleFileAccess(request, env) {
