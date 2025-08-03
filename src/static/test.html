@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试页面</title>
+    <link href="./css/tailwind.min.css" rel="stylesheet">
+    <link href="./css/fontawesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-center">图标和上传功能测试</h1>
+        
+        <!-- 测试图标 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">图标测试</h2>
+            <div class="flex space-x-4">
+                <i class="fas fa-images text-2xl"></i>
+                <i class="fas fa-copy text-2xl"></i>
+                <i class="fas fa-trash text-2xl"></i>
+                <i class="fas fa-upload text-2xl"></i>
+            </div>
+        </div>
+        
+        <!-- 测试上传 -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">上传功能测试</h2>
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-600 mb-4">点击选择文件或拖拽文件到此处</p>
+                <input type="file" id="test-file" class="hidden">
+                <button id="test-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg">
+                    选择文件
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('测试页面加载完成');
+            
+            // 测试按钮点击
+            document.getElementById('test-btn').addEventListener('click', function() {
+                console.log('按钮点击事件触发');
+                document.getElementById('test-file').click();
+            });
+            
+            // 测试文件选择
+            document.getElementById('test-file').addEventListener('change', function(e) {
+                console.log('文件选择事件触发', e.target.files);
+                if (e.target.files.length > 0) {
+                    console.log('选中文件:', e.target.files[0].name);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -14,9 +14,9 @@ export const imageRoutes = {
     switch (method) {
       case 'GET':
         return await this.handleList(request, env);
-      case 'POST':
-        return new Response('Method not allowed', { status: 405 });
       case 'DELETE':
+        return await this.handleDelete(request, env);
+      case 'POST':
         return new Response('Method not allowed', { status: 405 });
       default:
         return new Response('Method not allowed', { status: 405 });
@@ -79,7 +79,32 @@ export const imageRoutes = {
   },
 
   async handleDelete(request, env) {
-    return new Response('Method not allowed', { status: 405 });
+    try {
+      const url = new URL(request.url);
+      const key = url.pathname.substring('/api/images/'.length);
+      
+      if (!key) {
+        return createCORSResponse({ error: 'Image key is required' }, 400);
+      }
+
+      // 检查文件是否存在
+      const object = await env.image_host_bucket.get(key);
+      if (!object) {
+        return createCORSResponse({ error: 'Image not found' }, 404);
+      }
+
+      // 删除文件
+      await env.image_host_bucket.delete(key);
+
+      return createCORSResponse({ 
+        message: 'Image deleted successfully',
+        key: key 
+      });
+
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      return createCORSResponse({ error: error.message }, 500);
+    }
   },
 
   async handleFileAccess(request, env) {

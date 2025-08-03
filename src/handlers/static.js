@@ -9,7 +9,14 @@ export const staticRoutes = {
 
     try {
       // 使用Cloudflare Assets绑定处理静态资源
-      return await env.ASSETS.fetch(request);
+      let response = await env.ASSETS.fetch(request);
+      
+      // 如果是HTML文件，注入环境变量
+      if (path === '/' || path.endsWith('.html')) {
+        response = await this.injectEnvVariables(response, env);
+      }
+      
+      return response;
     } catch (error) {
       console.error('Error serving static asset:', error);
       
@@ -20,6 +27,30 @@ export const staticRoutes = {
       
       return new Response('Not Found', { status: 404 });
     }
+  },
+
+  async injectEnvVariables(response, env) {
+    // 获取原始HTML内容
+    let html = await response.text();
+    
+    // 创建环境变量脚本
+    const envScript = `
+    <script>
+      // 注入环境变量
+      const WEB_UPLOAD_ENABLED = ${JSON.stringify(env.WEB_UPLOAD_ENABLED || 'true')};
+    </script>
+    `;
+    
+    // 将环境变量脚本注入到HTML中，在</title>标签后插入
+    html = html.replace('</title>', `</title>${envScript}`);
+    
+    // 返回修改后的响应
+    return new Response(html, {
+      headers: {
+        'Content-Type': 'text/html',
+        ...response.headers
+      }
+    });
   },
 
   getFallbackHTML() {

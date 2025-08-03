@@ -53,7 +53,12 @@ export const uploadRoutes = {
       const key = folder ? `${prefix}/${folder}/${fileName}` : `${prefix}/${fileName}`;
 
       // 上传到R2存储桶
-      await env.image_host_bucket.put(key, file);
+      try {
+        await env.image_host_bucket.put(key, file);
+      } catch (error) {
+        console.error('Failed to upload to R2:', error);
+        return createCORSResponse({ error: 'Failed to save file to storage', details: error.message }, 500);
+      }
 
       // 确保realDomain不包含协议前缀
       const rawRealDomain = env.CUSTOM_DOMAIN || 'localhost';
@@ -72,7 +77,8 @@ export const uploadRoutes = {
         url,
         cdnUrl,
         name: fileName,
-        size: file.size
+        size: file.size,
+        message: 'Upload successful'
       });
 
     } catch (error) {

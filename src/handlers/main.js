@@ -44,8 +44,8 @@ async function handleAPIRoutes(request, env, ctx) {
   const method = request.method;
 
   // 认证检查（除了公开路由）
-  const isPublicRoute = ['/api/list', '/api/stats', '/api/images', '/api/folders'].includes(path) || 
-                       path.startsWith('/api/images') || 
+  const isPublicRoute = ['/api/auth', '/api/list', '/api/stats', '/api/images', '/api/folders'].includes(path) || 
+                       (path.startsWith('/api/images') && method === 'GET') || 
                        path.startsWith('/api/folders');
   if (!isPublicRoute) {
     const user = await authenticate(request, env);
@@ -62,6 +62,8 @@ async function handleAPIRoutes(request, env, ctx) {
 
   // 路由分发
   switch (true) {
+    case path === '/api/auth' && method === 'POST':
+      return await handleAuth(request, env);
     case path.startsWith('/api/images'):
       return await imageRoutes.handle(request, env);
     case path.startsWith('/api/folders'):
@@ -75,6 +77,49 @@ async function handleAPIRoutes(request, env, ctx) {
         status: 404,
         headers: corsHeaders
       });
+  }
+}
+
+async function handleAuth(request, env) {
+  try {
+    const { username, password } = await request.json();
+    
+    // 验证用户名密码
+    if (username === env.AUTH_USERNAME && password === env.AUTH_PASSWORD) {
+      // 生成简单token（实际项目中应使用JWT）
+      const token = btoa(`${username}:${Date.now()}:${Math.random()}`);
+      
+      return new Response(JSON.stringify({
+        token: token,
+        user: { username: username }
+      }), {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+    
+    return new Response(JSON.stringify({
+      error: 'Invalid credentials'
+    }), {
+      status: 401,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({
+      error: 'Invalid request format'
+    }), {
+      status: 400,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      }
+    });
   }
 }
 

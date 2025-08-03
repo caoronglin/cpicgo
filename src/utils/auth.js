@@ -8,16 +8,30 @@ export async function authenticate(request, env) {
 
   const [scheme, credentials] = authHeader.split(' ');
 
-  // Bearer token认证
+  // Bearer token认证（支持前端生成的token和API token）
   if (scheme === 'Bearer') {
-    return credentials === env.API_TOKEN ? { id: 'api-user', type: 'api' } : null;
+    // 如果是API token
+    if (credentials === env.API_TOKEN) {
+      return { id: 'api-user', type: 'api' };
+    }
+    
+    // 验证前端生成的token（简单验证）
+    try {
+      const decoded = atob(credentials);
+      const [username, timestamp] = decoded.split(':');
+      if (username === env.AUTH_USERNAME) {
+        return { id: username, type: 'token' };
+      }
+    } catch {
+      return null;
+    }
   }
 
   // Basic认证
   if (scheme === 'Basic') {
     try {
       const [username, password] = atob(credentials).split(':');
-      if (username === env.USERNAME && password === env.PASSWORD) {
+      if (username === env.AUTH_USERNAME && password === env.AUTH_PASSWORD) {
         return { id: username, type: 'basic' };
       }
     } catch {

@@ -51,8 +51,11 @@
 	 */
 	"vars": {
 		"ENVIRONMENT": "production",
-		"CUSTOM_DOMAIN": "img.837838.xyz",
-		"CDN_DOMAIN": "img2.cnortles.top"
+		"CUSTOM_DOMAIN": "",
+		"CDN_DOMAIN": "",
+		"WEB_UPLOAD_ENABLED": "true",
+		"AUTH_USERNAME": "",
+		"AUTH_PASSWORD": ""
 	},
 	"r2_buckets": [
 		{
